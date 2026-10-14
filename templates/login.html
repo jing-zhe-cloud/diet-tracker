@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>饮食记录 - 登录</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+        }
+        .card {
+            background: #fff; border-radius: 20px; padding: 40px 36px;
+            width: 380px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .card h2 { text-align: center; font-size: 24px; color: #2d3436; margin-bottom: 8px; }
+        .card .sub { text-align: center; font-size: 13px; color: #b2bec3; margin-bottom: 28px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; color: #636e72; margin-bottom: 6px; font-weight: 600; }
+        .form-group input {
+            width: 100%; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 10px;
+            font-size: 15px; outline: none; transition: border .2s;
+        }
+        .form-group input:focus { border-color: #667eea; }
+        .btn {
+            width: 100%; padding: 12px; border: none; border-radius: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 8px;
+        }
+        .btn:hover { opacity: 0.92; }
+        .switch { text-align: center; margin-top: 16px; font-size: 13px; color: #636e72; }
+        .switch a { color: #667eea; cursor: pointer; font-weight: 600; text-decoration: none; }
+        .switch a:hover { text-decoration: underline; }
+        .error { color: #e17055; font-size: 13px; text-align: center; margin-top: 8px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2 id="cardTitle">登录</h2>
+        <p class="sub" id="cardSub">记录每一餐的营养摄入</p>
+        <div class="form-group"><label>用户名</label><input type="text" id="username" placeholder="请输入用户名" autocomplete="off"></div>
+        <div class="form-group"><label>密码</label><input type="password" id="password" placeholder="请输入密码"></div>
+        <button class="btn" id="submitBtn" onclick="submitAuth()">登 录</button>
+        <p class="error" id="errorMsg"></p>
+        <p class="switch">
+            <span id="switchText">没有账号？</span>
+            <a id="switchLink" onclick="toggleMode()">注册</a>
+        </p>
+    </div>
+
+    <script>
+        let mode = 'login';
+
+        function toggleMode() {
+            mode = mode === 'login' ? 'register' : 'login';
+            document.getElementById('cardTitle').textContent = mode === 'login' ? '登录' : '注册';
+            document.getElementById('submitBtn').textContent = mode === 'login' ? '登 录' : '注 册';
+            document.getElementById('switchText').textContent = mode === 'login' ? '没有账号？' : '已有账号？';
+            document.getElementById('switchLink').textContent = mode === 'login' ? '注册' : '登录';
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+
+        async function submitAuth() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const err = document.getElementById('errorMsg');
+            if (!username || !password) { err.textContent = '请填写用户名和密码'; err.style.display = ''; return; }
+
+            const url = mode === 'login' ? '/api/auth/login' : '/api/auth/register';
+            const resp = await fetch(url, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await resp.json();
+            if (resp.ok) {
+                window.location.href = '/';
+            } else {
+                err.textContent = data.error || '操作失败';
+                err.style.display = '';
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') submitAuth();
+        });
+    </script>
+</body>
+</html>
